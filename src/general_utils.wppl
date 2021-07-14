@@ -1,0 +1,26 @@
+var cartesian_product = function(arr_a, arr_b) {
+  if (arr_a.length == 0) {
+    return [];
+  } else {
+    var first_part = map(function (x) {return [arr_a[0], x];}, arr_b);
+    return first_part.concat(cartesian_product(arr_a.slice(1,arr_a.length), arr_b));
+  }
+  
+  if (arr_b.length == 0) {
+    return [];
+  } else {
+    var first_part = map(function (x) {return [x, arr_b[0]];}, arr_a);
+    return first_part.concat(cartesian_product(arr_a, arr_b.slice(1,arr_b.length)));
+  }
+}
+
+var min = function(arr) {
+  reduce(function(x, acc) {return (x[1] < acc[1]) ? x : acc;}, [-1,100], map2(function (idx, el) {return [idx,el];}, arr, mapN(function (idx) {return idx;}, arr)));
+}
+
+var arrays_equal = function(a,b) {
+  var same_length = a.length == b.length;
+  var element_equality = map2(function (a_el, b_el) {a_el == b_el;}, a, b);
+  var all_elements_equal = reduce(function (x, acc) {return x && acc}, true, element_equality);
+  return same_length && all_elements_equal
+}

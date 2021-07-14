@@ -1,0 +1,28 @@
+{
+  "name": "liars_dice",
+  "version": "1.0.0",
+  "description": "Bayesian Inference problem: Infer the highest utility action from the following (Actions):     - Call previous guess     - New guess",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "webppl": {
+    "wppl": [
+      "src/general_utils.wppl",
+      "src/domain_specific_utils.wppl"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theosech/liars_dice.git"
+  },
+  "author": "Theo Sechopoulos",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/theosech/liars_dice/issues"
+  },
+  "homepage": "https://github.com/theosech/liars_dice#readme",
+  "dependencies": {
+    "minimist": "^1.2.5"
+  }
+}

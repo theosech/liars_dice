@@ -1,0 +1,11 @@
+
+var player_die_roll = function(n) {
+  return Multinomial({ps: [1/6,1/6,1/6,1/6,1/6,1/6], n: n});
+};
+
+var get_possible_next_moves = cache(function(count, dice_number) {
+  var possible_counts = mapN(function(x) {return x + count;}, 2);
+  var dice_numbers = mapN(function(x) {return x+2;}, 5);
+  var all_next_moves = cartesian_product(possible_counts, dice_numbers);
+  return filter(function (x) {return (x[0] > count ||  x[1] > dice_number);}, all_next_moves);
+});

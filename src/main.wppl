@@ -1,0 +1,79 @@
+// Model Main
+
+var get_total_dice_with_number = mem(function(dice_number_guess, alleged_counts, my_dice, players_num_dices, to_condition) {
+  // var simulate_player = function(num_dice) {return function() {player_die_roll(num_dice)};};
+  var players = mapData({data: players_num_dices}, function(n) {return player_die_roll(n);});
+
+  var num_dice_with_number = function(dice_number_guess, player_dice) {
+    return player_dice[0] + player_dice[dice_number_guess-1];
+  };
+
+  var num_dice_others = sum(
+      mapData({data: players.slice(1, players.length)}, function(player_dice) {
+        num_dice_with_number(dice_number_guess, sample(player_dice))
+      }
+    ));
+
+  if (to_condition) {
+        return num_dice_others + num_dice_with_number(dice_number_guess, my_dice);
+  } else {
+    return num_dice_others + num_dice_with_number(dice_number_guess, sample(players[0]));
+  }
+})
+
+// Given a bet, my dice, and the total number of dice, computes the probability of the bet being true
+var get_call_success = function(dice_number_guess, alleged_counts, my_dice, players_num_dices, to_condition) {
+    var total_dice_with_number = get_total_dice_with_number(dice_number_guess, alleged_counts, my_dice, players_num_dices, condition);
+    var call_success = total_dice_with_number < alleged_counts;
+    return call_success;
+}
+
+var get_expected_call_utility = function(call_success_prob, num_players) {
+    var num_players = num_players;
+    var success_value = 1/(num_players-1);
+    var failure_value = -1;
+    var call_expected_utility = (call_success_prob * success_value) + ((1-call_success_prob) * failure_value);
+    return call_expected_utility;
+}
+
+// Based on the current bet, the number of players and my dice, returns the best action. Assumes the player playing after always
+// calls which reduces the expected utility calculations to just selecting the minimum call success probability action (except for the
+// action of calling the given move for which we use the call_failure probability in the minimization). Because of this assumption
+// even if calling is given as the best move we might want to forego calling if the next player has << 1 probability of calling
+var policy = function(dice_number_guess, alleged_counts, my_dice, players_num_dices, enumerate) {
+
+    var inference_method = enumerate ? {method: "enumerate"} : {method: "MCMC", samples: 10000};
+
+    var call_success_dist = Infer(inference_method, function() {get_call_success(dice_number_guess, alleged_counts, my_dice, players_num_dices, true);});
+    var call_success_prob = Math.exp(call_success_dist.score(true));
+
+    var possible_moves = get_possible_next_moves(alleged_counts, dice_number_guess);
+    var next_move_call_success_probabilities = mapData({data: possible_moves}, function(move) { 
+      var call_dist = Infer(inference_method, function() {get_call_success(move[1], move[0], my_dice, players_num_dices, true);});
+      return Math.exp(call_dist.score(false));
+    });
+
+    // add calling and respective success probability as possible move
+    next_move_call_success_probabilities.push(call_success_prob);
+    possible_moves.push("call");
+
+    var dist = Categorical({ps: next_move_call_success_probabilities, vs: possible_moves});
+    console.log("moves: ", possible_moves);
+    console.log("move probs: ", dist.params.ps);
+    return dist.MAP().val;
+  }
+
+
+var model = function(enumerate) {return function() {
+  var players_num_dices = [1,1];
+  var my_dice = [0,0,0,1,0,0];
+  var dice_number_guess = 1;
+  var alleged_counts = 2;  
+  return policy(dice_number_guess, alleged_counts, my_dice, players_num_dices, enumerate);
+};}
+
+var enumerate = false;
+var res = Infer({method: "enumerate"}, model(enumerate));
+console.log(res.MAP());
+
+// Infer({method: 'MCMC', samples: 1}, model);
