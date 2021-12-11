@@ -2,15 +2,15 @@
 
 # Bayesian Inference problem
 Infer the highest utility action from the following (Actions):
-    - Call previous guess
-    - New guess
+- Call previous guess
+- New guess
 
 Each possible outcome corresponds to the following rewards (Rewards):
-    - (1 / (num_players-1)) if I succesfully call someone
-    - -1 if I unsuccessfully call someone
-    - -1 if my guess gets successfully get called
-    - (1 / (num_players-1)) if my guess get unsuccessfully called
-    - 0 if my guess does not get called
+* (1 / (num_players-1)) if I succesfully call someone
+* -1 if I unsuccessfully call someone
+* -1 if my guess gets successfully get called
+* (1 / (num_players-1)) if my guess get unsuccessfully called
+* 0 if my guess does not get called
     
 ### Pior Probability Model:
     We have a prior over distribution of total dice. When selecting a bet
